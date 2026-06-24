@@ -3,18 +3,20 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import { worldmonitorRoutes } from './routes/worldmonitor.js';
 import { healthRoutes } from './routes/health.js';
+import { voidnextRoutes } from './routes/voidnext.js';
 
 const server = Fastify({ logger: { level: process.env.LOG_LEVEL ?? 'info' } });
 
 await server.register(cors, {
   origin: process.env.CORS_ORIGIN ?? '*',
-  methods: ['GET'],
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'x-api-key', 'x-wallet-address'],
 });
 
 const API_KEY = process.env.WORLDMONITOR_SNAPSHOT_API_KEY;
 
 server.addHook('onRequest', async (request, reply) => {
-  if (request.url === '/health') return;
+  if (request.url === '/health' || request.url.startsWith('/wm/voidnext/')) return;
 
   if (API_KEY) {
     const provided = request.headers['x-api-key'];
@@ -25,6 +27,7 @@ server.addHook('onRequest', async (request, reply) => {
 });
 
 await server.register(worldmonitorRoutes, { prefix: '/wm/consumer-prices/v1' });
+await server.register(voidnextRoutes, { prefix: '/wm/voidnext/v1' });
 await server.register(healthRoutes, { prefix: '/health' });
 
 const port = parseInt(process.env.PORT ?? '3400', 10);

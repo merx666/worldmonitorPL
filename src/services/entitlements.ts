@@ -155,11 +155,8 @@ export function hasTier(minTier: number): boolean {
  * Returns true if entitlement data exists, plan is not free, and hasn't expired.
  */
 export function isEntitled(): boolean {
-  return (
-    currentState !== null &&
-    currentState.planKey !== 'free' &&
-    currentState.validUntil >= Date.now()
-  );
+  // PRO UNLOCKED: all users treated as entitled
+  return true;
 }
 
 /**

@@ -2,10 +2,6 @@ import type { PanelConfig, MapLayers, DataSourceId } from '@/types';
 import { SITE_VARIANT } from './variant';
 // boundary-ignore: isDesktopRuntime is a pure env probe with no service dependencies
 import { isDesktopRuntime } from '@/services/runtime';
-// boundary-ignore: getSecretState is a pure env/keychain probe with no service dependencies
-import { getSecretState } from '@/services/runtime-config';
-// boundary-ignore: isEntitled is a pure state check with no side effects
-import { isEntitled } from '@/services/entitlements';
 
 const _desktop = isDesktopRuntime();
 
@@ -21,11 +17,11 @@ const FULL_PANELS: Record<string, PanelConfig> = {
   'windy-webcams': { name: 'Windy Live Webcam', enabled: false, priority: 2 },
   insights: { name: 'AI Insights', enabled: true, priority: 1 },
   'strategic-posture': { name: 'AI Strategic Posture', enabled: true, priority: 1 },
-  forecast: { name: 'AI Forecasts', enabled: true, priority: 1, ...(_desktop && { premium: 'locked' as const }) }, // trial: unlocked on web, locked on desktop
-  cii: { name: 'Country Instability', enabled: true, priority: 1, ...(_desktop && { premium: 'enhanced' as const }) },
-  'strategic-risk': { name: 'Strategic Risk Overview', enabled: true, priority: 1, ...(_desktop && { premium: 'enhanced' as const }) },
+  forecast: { name: 'AI Forecasts', enabled: true, priority: 1 }, // PRO UNLOCKED
+  cii: { name: 'Country Instability', enabled: true, priority: 1 },
+  'strategic-risk': { name: 'Strategic Risk Overview', enabled: true, priority: 1 },
   intel: { name: 'Intel Feed', enabled: true, priority: 1 },
-  'gdelt-intel': { name: 'Live Intelligence', enabled: true, priority: 1, ...(_desktop && { premium: 'enhanced' as const }) },
+  'gdelt-intel': { name: 'Live Intelligence', enabled: true, priority: 1 },
   cascade: { name: 'Infrastructure Cascade', enabled: true, priority: 1 },
   'military-correlation': { name: 'Force Posture', enabled: true, priority: 2 },
   'escalation-correlation': { name: 'Escalation Monitor', enabled: true, priority: 2 },
@@ -46,13 +42,13 @@ const FULL_PANELS: Record<string, PanelConfig> = {
   'energy-complex': { name: 'Energy Complex', enabled: true, priority: 1 },
   'oil-inventories': { name: 'Oil Inventories', enabled: true, priority: 60 },
   markets: { name: 'Markets', enabled: true, priority: 1 },
-  'stock-analysis': { name: 'Stock Analysis', enabled: true, priority: 1, premium: 'locked' as const },
-  'stock-backtest': { name: 'Backtesting', enabled: true, priority: 1, premium: 'locked' as const },
-  'daily-market-brief': { name: 'Daily Market Brief', enabled: true, priority: 1, premium: 'locked' as const },
-  'chat-analyst': { name: 'WM Analyst', enabled: true, priority: 1, premium: 'locked' as const },
+  'stock-analysis': { name: 'Stock Analysis', enabled: true, priority: 1 },
+  'stock-backtest': { name: 'Backtesting', enabled: true, priority: 1 },
+  'daily-market-brief': { name: 'Daily Market Brief', enabled: true, priority: 1 },
+  'chat-analyst': { name: 'WM Analyst', enabled: true, priority: 1 },
   economic: { name: 'Macro Stress', enabled: true, priority: 1 },
   'trade-policy': { name: 'Trade Policy', enabled: true, priority: 1 },
-  'supply-chain': { name: 'Supply Chain', enabled: true, priority: 1, ...(_desktop && { premium: 'enhanced' as const }) },
+  'supply-chain': { name: 'Supply Chain', enabled: true, priority: 1 },
   finance: { name: 'Financial', enabled: true, priority: 1 },
   tech: { name: 'Technology', enabled: true, priority: 2 },
   crypto: { name: 'Crypto', enabled: true, priority: 2 },
@@ -60,7 +56,7 @@ const FULL_PANELS: Record<string, PanelConfig> = {
   ai: { name: 'AI/ML', enabled: true, priority: 2 },
   layoffs: { name: 'Layoffs Tracker', enabled: true, priority: 2 },
   monitors: { name: 'My Monitors', enabled: true, priority: 2 },
-  'latest-brief': { name: 'Latest Brief', enabled: true, priority: 1, premium: 'locked' as const },
+  'latest-brief': { name: 'Latest Brief', enabled: true, priority: 1 },
   'satellite-fires': { name: 'Fires', enabled: true, priority: 2 },
   'macro-signals': { name: 'Market Regime', enabled: true, priority: 2 },
   'fear-greed': { name: 'Fear & Greed', enabled: true, priority: 2 },
@@ -88,7 +84,7 @@ const FULL_PANELS: Record<string, PanelConfig> = {
   'ucdp-events': { name: 'UCDP Conflict Events', enabled: true, priority: 2 },
   'disease-outbreaks': { name: 'Disease Outbreaks', enabled: true, priority: 2 },
   'social-velocity': { name: 'Social Velocity', enabled: true, priority: 2 },
-  'wsb-ticker-scanner': { name: 'WSB Ticker Scanner', enabled: true, priority: 75, premium: 'locked' as const },
+  'wsb-ticker-scanner': { name: 'WSB Ticker Scanner', enabled: true, priority: 75 },
   giving: { name: 'Global Giving', enabled: false, priority: 2 },
   displacement: { name: 'UNHCR Displacement', enabled: true, priority: 2 },
   climate: { name: 'Climate Anomalies', enabled: true, priority: 2 },
@@ -99,16 +95,16 @@ const FULL_PANELS: Record<string, PanelConfig> = {
   'defense-patents': { name: 'R&D Signal', enabled: true, priority: 2 },
   'radiation-watch': { name: 'Radiation Watch', enabled: true, priority: 2 },
   'thermal-escalation': { name: 'Thermal Escalation', enabled: true, priority: 2 },
-  'oref-sirens': { name: 'Israel Sirens', enabled: true, priority: 2, ...(_desktop && { premium: 'locked' as const }) },
-  'telegram-intel': { name: 'Telegram Intel', enabled: true, priority: 2, ...(_desktop && { premium: 'locked' as const }) },
+  'oref-sirens': { name: 'Israel Sirens', enabled: true, priority: 2 },
+  'telegram-intel': { name: 'Telegram Intel', enabled: true, priority: 2 },
   'airline-intel': { name: 'Airline Intelligence', enabled: true, priority: 2 },
   'tech-readiness': { name: 'Tech Readiness Index', enabled: true, priority: 2 },
   'world-clock': { name: 'World Clock', enabled: true, priority: 2 },
   'national-debt': { name: 'Global Debt Clock', enabled: true, priority: 2 },
   'cross-source-signals': { name: 'Cross-Source Signals', enabled: true, priority: 2 },
-  'market-implications': { name: 'AI Market Implications', enabled: true, priority: 1, premium: 'locked' as const },
-  'regional-intelligence': { name: 'Regional Intelligence', enabled: false, priority: 1, premium: 'locked' as const },
-  'deduction': { name: 'Deduct Situation', enabled: false, priority: 1, premium: 'locked' as const },
+  'market-implications': { name: 'AI Market Implications', enabled: true, priority: 1 },
+  'regional-intelligence': { name: 'Regional Intelligence', enabled: false, priority: 1 },
+  'deduction': { name: 'Deduct Situation', enabled: false, priority: 1 },
   'geo-hubs': { name: 'Geopolitical Hubs', enabled: false, priority: 2 },
   'tech-hubs': { name: 'Hot Tech Hubs', enabled: false, priority: 2 },
 };
@@ -280,7 +276,7 @@ const TECH_PANELS: Record<string, PanelConfig> = {
   'airline-intel': { name: 'Airline Intelligence', enabled: true, priority: 2 },
   'world-clock': { name: 'World Clock', enabled: true, priority: 2 },
   monitors: { name: 'My Monitors', enabled: true, priority: 2 },
-  'latest-brief': { name: 'Latest Brief', enabled: true, priority: 1, premium: 'locked' as const },
+  'latest-brief': { name: 'Latest Brief', enabled: true, priority: 1 },
   'tech-hubs': { name: 'Hot Tech Hubs', enabled: false, priority: 2 },
   'ai-regulation': { name: 'AI Regulation Dashboard', enabled: false, priority: 2 },
 };
@@ -419,9 +415,9 @@ const FINANCE_PANELS: Record<string, PanelConfig> = {
   'windy-webcams': { name: 'Windy Live Webcam', enabled: false, priority: 2 },
   insights: { name: 'AI Market Insights', enabled: true, priority: 1 },
   markets: { name: 'Live Markets', enabled: true, priority: 1 },
-  'stock-analysis': { name: 'Premium Stock Analysis', enabled: true, priority: 1, premium: 'locked' },
-  'stock-backtest': { name: 'Premium Backtesting', enabled: true, priority: 1, premium: 'locked' },
-  'daily-market-brief': { name: 'Daily Market Brief', enabled: true, priority: 1, premium: 'locked' },
+  'stock-analysis': { name: 'Premium Stock Analysis', enabled: true, priority: 1 },
+  'stock-backtest': { name: 'Premium Backtesting', enabled: true, priority: 1 },
+  'daily-market-brief': { name: 'Daily Market Brief', enabled: true, priority: 1 },
   'markets-news': { name: 'Markets News', enabled: true, priority: 2 },
   forex: { name: 'Forex & Currencies', enabled: true, priority: 1 },
   bonds: { name: 'Fixed Income', enabled: true, priority: 1 },
@@ -467,11 +463,11 @@ const FINANCE_PANELS: Record<string, PanelConfig> = {
   'gulf-economies': { name: 'Gulf Economies', enabled: true, priority: 1 },
   'consumer-prices': { name: 'Consumer Prices', enabled: true, priority: 1 },
   polymarket: { name: 'Predictions', enabled: true, priority: 2 },
-  'wsb-ticker-scanner': { name: 'WSB Ticker Scanner', enabled: true, priority: 75, premium: 'locked' },
+  'wsb-ticker-scanner': { name: 'WSB Ticker Scanner', enabled: true, priority: 75 },
   'airline-intel': { name: 'Airline Intelligence', enabled: true, priority: 2 },
   'world-clock': { name: 'World Clock', enabled: true, priority: 2 },
   monitors: { name: 'My Monitors', enabled: true, priority: 2 },
-  'latest-brief': { name: 'Latest Brief', enabled: true, priority: 1, premium: 'locked' as const },
+  'latest-brief': { name: 'Latest Brief', enabled: true, priority: 1 },
 };
 
 const FINANCE_MAP_LAYERS: MapLayers = {
@@ -773,7 +769,7 @@ const COMMODITY_PANELS: Record<string, PanelConfig> = {
   polymarket: { name: 'Commodity Predictions', enabled: true, priority: 2 },
   'world-clock': { name: 'World Clock', enabled: true, priority: 2 },
   monitors: { name: 'My Monitors', enabled: true, priority: 2 },
-  'latest-brief': { name: 'Latest Brief', enabled: true, priority: 1, premium: 'locked' as const },
+  'latest-brief': { name: 'Latest Brief', enabled: true, priority: 1 },
 };
 
 const COMMODITY_MAP_LAYERS: MapLayers = {
@@ -958,24 +954,16 @@ export function getEffectivePanelConfig(key: string, variant: string): PanelConf
   return { ...base, ...override };
 }
 
-export const FREE_MAX_PANELS = 40;
-export const FREE_MAX_SOURCES = 80;
+// PRO UNLOCKED: no limits on panels or sources
+export const FREE_MAX_PANELS = 999;
+export const FREE_MAX_SOURCES = 999;
 
 /**
  * Returns true if the current user is entitled to enable/view this panel.
  * Mirrors the entitlement checks in panel-layout.ts (single source of truth).
  */
-export function isPanelEntitled(key: string, config: PanelConfig, isPro = false): boolean {
-  if (!config.premium) return true;
-  // Dodo entitlements unlock all premium panels
-  if (isEntitled()) return true;
-  const apiKeyPanels = ['stock-analysis', 'stock-backtest', 'daily-market-brief', 'market-implications', 'regional-intelligence', 'deduction', 'chat-analyst', 'wsb-ticker-scanner'];
-  if (apiKeyPanels.includes(key)) {
-    return getSecretState('WORLDMONITOR_API_KEY').present || isPro;
-  }
-  if (config.premium === 'locked') {
-    return isDesktopRuntime();
-  }
+export function isPanelEntitled(_key: string, _config: PanelConfig, _isPro = false): boolean {
+  // PRO UNLOCKED: all panels are entitled
   return true;
 }
 

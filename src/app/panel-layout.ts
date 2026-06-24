@@ -115,34 +115,13 @@ import type { AuthSession } from '@/services/auth-state';
 import { PanelGateReason, getPanelGateReason, hasPremiumAccess } from '@/services/panel-gating';
 import type { Panel } from '@/components/Panel';
 
-/** Panels that require premium access on web. Auth-based gating applies to these. */
-const WEB_PREMIUM_PANELS = new Set([
-  'stock-analysis',
-  'stock-backtest',
-  'daily-market-brief',
-  'market-implications',
-  'deduction',
-  'chat-analyst',
-  'wsb-ticker-scanner',
-  'latest-brief',
-]);
+/** PRO UNLOCKED: no panels require premium access on web */
+const WEB_PREMIUM_PANELS = new Set<string>([]);
 
 /**
- * Panels that require a Clerk-authenticated PRO account specifically.
- * Desktop API key / browser tester keys do NOT satisfy the gate because
- * these panels are bound to a Clerk userId server-side (e.g. the Brief
- * is stored at brief:{clerkUserId}:{date} in Redis — no Clerk user, no
- * brief to fetch).
- *
- * Without this extra gate, API-key + free-Clerk users would see the
- * panel "unlocked" by hasPremiumAccess() and then hit a 403 when the
- * server re-checks entitlement from the JWT. This set promotes the
- * inconsistency to the layout gating layer so the user sees the
- * correct "Upgrade to Pro" CTA instead of a doomed fetch.
+ * PRO UNLOCKED: no panels require Clerk Pro specifically.
  */
-const WEB_CLERK_PRO_ONLY_PANELS = new Set([
-  'latest-brief',
-]);
+const WEB_CLERK_PRO_ONLY_PANELS = new Set<string>([]);
 
 export interface PanelLayoutManagerCallbacks {
   openCountryStory: (code: string, name: string) => void;
@@ -1442,17 +1421,11 @@ export class PanelLayoutManager implements AppModule {
     });
     panelsGrid.appendChild(mcpBlock);
 
-    // Reactively show/hide Pro-only UI blocks based on auth state
+    // PRO UNLOCKED: Pro-only UI blocks are always visible
     const proBlocks = [proBlock, mcpBlock];
-    const applyProBlockGating = (isPro: boolean) => {
-      for (const block of proBlocks) {
-        block.style.display = isPro ? '' : 'none';
-      }
-    };
-    applyProBlockGating(hasPremiumAccess(getAuthState()));
-    this.proBlockUnsubscribe = subscribeAuthState((state) => {
-      applyProBlockGating(hasPremiumAccess(state));
-    });
+    for (const block of proBlocks) {
+      block.style.display = '';
+    }
 
     const bottomGrid = document.getElementById('mapBottomGrid');
     if (bottomGrid) {

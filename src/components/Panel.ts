@@ -22,9 +22,7 @@ export interface PanelOptions {
   defaultRowSpan?: number;
 }
 
-const lockSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>`;
 
-const upgradeSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="16 12 12 8 8 12"/><line x1="12" y1="16" x2="12" y2="8"/></svg>`;
 
 const PANEL_SPANS_KEY = 'worldmonitor-panel-spans';
 
@@ -828,81 +826,14 @@ export class Panel {
     this.retryAttempt = 0;
   }
 
-  public showLocked(features: string[] = []): void {
-    this._locked = true;
-    this.clearRetryCountdown();
-
-    for (let child = this.header.nextElementSibling; child && child !== this.content; child = child.nextElementSibling) {
-      (child as HTMLElement).style.display = 'none';
-    }
-    this.element.classList.add('panel-is-locked');
-
-    const iconEl = h('div', { className: 'panel-locked-icon' });
-    iconEl.innerHTML = lockSvg;
-
-    const lockedChildren: (HTMLElement | string)[] = [
-      iconEl,
-      h('div', { className: 'panel-locked-desc' }, t('premium.lockedDesc')),
-    ];
-
-    if (features.length > 0) {
-      const featureList = h('ul', { className: 'panel-locked-features' });
-      for (const feat of features) {
-        featureList.appendChild(h('li', {}, feat));
-      }
-      lockedChildren.push(featureList);
-    }
-
-    const ctaBtn = h('button', { type: 'button', className: 'panel-locked-cta' }, 'Upgrade to Pro');
-    if (isDesktopRuntime()) {
-      ctaBtn.addEventListener('click', () => void invokeTauri<void>('open_url', { url: 'https://worldmonitor.app/pro' }).catch(() => window.open('https://worldmonitor.app/pro', '_blank')));
-    } else {
-      ctaBtn.addEventListener('click', () => {
-        import('@/services/checkout').then(m => import('@/config/products').then(p => m.startCheckout(p.DEFAULT_UPGRADE_PRODUCT))).catch(() => {
-          window.open('https://worldmonitor.app/pro', '_blank');
-        });
-      });
-    }
-    lockedChildren.push(ctaBtn);
-
-    replaceChildren(this.content, h('div', { className: 'panel-locked-state' }, ...lockedChildren));
+  public showLocked(_features: string[] = []): void {
+    // PRO UNLOCKED: never show locked overlay
+    return;
   }
 
-  public showGatedCta(reason: PanelGateReason, onAction: () => void): void {
-    this._locked = true;
-    this.clearRetryCountdown();
-
-    // Hide elements between header and content (same as showLocked)
-    for (let child = this.header.nextElementSibling; child && child !== this.content; child = child.nextElementSibling) {
-      (child as HTMLElement).style.display = 'none';
-    }
-    this.element.classList.add('panel-is-locked');
-
-    const config: Record<string, { icon: string; desc: string; cta: string }> = {
-      [PanelGateReason.ANONYMOUS]: {
-        icon: lockSvg,
-        desc: t('premium.signInToUnlock'),
-        cta: t('premium.signIn'),
-      },
-      [PanelGateReason.FREE_TIER]: {
-        icon: upgradeSvg,
-        desc: t('premium.upgradeDesc'),
-        cta: t('premium.upgradeToPro'),
-      },
-    };
-
-    const entry = config[reason];
-    if (!entry) return; // PanelGateReason.NONE should never reach here
-
-    const iconEl = h('div', { className: 'panel-locked-icon' });
-    iconEl.innerHTML = entry.icon;
-
-    const descEl = h('div', { className: 'panel-locked-desc' }, entry.desc);
-
-    const ctaBtn = h('button', { type: 'button', className: 'panel-locked-cta' }, entry.cta);
-    ctaBtn.addEventListener('click', onAction);
-
-    replaceChildren(this.content, h('div', { className: 'panel-locked-state' }, iconEl, descEl, ctaBtn));
+  public showGatedCta(_reason: PanelGateReason, _onAction: () => void): void {
+    // PRO UNLOCKED: never show gated CTA overlay
+    return;
   }
 
   public unlockPanel(): void {

@@ -70,3 +70,6 @@ tmp/
 docs/plans/
 docs/brainstorms/
 playground-pricing.html
+
+# Keys & Credentials
+signing-key-*.json
