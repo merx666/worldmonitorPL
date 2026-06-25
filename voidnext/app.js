@@ -181,16 +181,16 @@ async function triggerPayment() {
 
   try {
     console.log('Initiating World App MiniKit Pay command...');
-    const result = await MiniKit.commands.pay({
+    const result = await MiniKit.pay({
       reference: referenceId,
       to: recipient,
       tokens: [{ symbol: 'WLD', token_amount: price }],
       description: 'Next Wallet Premium Membership'
     });
 
-    if (result && result.status === 'success') {
+    if (result && result.transactionId) {
       console.log('Payment successful. Verifying on backend...', result);
-      await verifyPaymentBackend(result.transactionId || referenceId, 0.5);
+      await verifyPaymentBackend(result.transactionId, 0.5);
     } else {
       alert('Payment failed or cancelled.');
     }

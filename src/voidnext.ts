@@ -142,33 +142,20 @@ function setupVerifyButton(isMock: boolean): void {
         }, 1000);
       } else {
         try {
-          // Request Orb Verification / Registration
-          const result = await MiniKit.commands.verify({
-            action: 'register',
-            signal: 'user_registration',
-            verification_level: 'orb'
+          const result = await MiniKit.walletAuth({
+            nonce: Math.random().toString(36).substring(2, 15),
+            statement: 'Sign in to Next Wallet'
           });
           
-          if (result && result.status === 'success') {
-            const user = MiniKit.user;
-            if (user && user.walletAddress) {
-              userWallet = user.walletAddress;
-            } else {
-              userWallet = '0xVerifiedWallet' + Date.now().toString().substring(5);
-            }
-            
-            // Check Orb status from MiniKit context but do not block access
-            if (user && user.verificationStatus && user.verificationStatus.isOrbVerified) {
-              userVerificationLevel = 'Orb Verified';
-            } else {
-              userVerificationLevel = (user && user.verificationLevel) || 'Device Verified';
-            }
+          if (result && result.data && result.data.address) {
+            userWallet = result.data.address;
+            userVerificationLevel = 'Verified Wallet';
             
             btnVerify.textContent = 'Verified';
             
             if (gate) gate.classList.add('hidden');
             updateUserUI(userWallet, userVerificationLevel);
-            await loginUser(userWallet, (user && user.username) || 'WorldUser', userVerificationLevel);
+            await loginUser(userWallet, 'WorldUser', userVerificationLevel);
             switchTab('wallet');
           } else {
             btnVerify.disabled = false;
@@ -312,16 +299,16 @@ async function triggerPayment(): Promise<void> {
 
   try {
     console.log('Initiating World App MiniKit Pay command...');
-    const result = await MiniKit.commands.pay({
+    const result = await MiniKit.pay({
       reference: referenceId,
       to: recipient,
       tokens: [{ symbol: 'WLD', token_amount: price }],
       description: 'Next Wallet Premium Membership'
     });
 
-    if (result && result.status === 'success') {
+    if (result && result.transactionId) {
       console.log('Payment successful. Verifying on backend...', result);
-      await verifyPaymentBackend(result.transactionId || referenceId, 0.5);
+      await verifyPaymentBackend(result.transactionId, 0.5);
     } else {
       alert('Payment failed or cancelled.');
     }
@@ -1269,14 +1256,14 @@ function initWallet(): void {
       }
 
       try {
-        const result = await MiniKit.commands.pay({
+        const result = await MiniKit.pay({
           reference: referenceId,
           to: recipient,
-          tokens: [{ symbol: 'WLD', amount: amount }],
+          tokens: [{ symbol: 'WLD', token_amount: amount }],
           description: 'WLD Wallet Transfer'
         });
 
-        if (result && result.status === 'success') {
+        if (result && result.transactionId) {
           alert(`Successfully sent ${amount} WLD!`);
           updateWalletBalances();
         } else {

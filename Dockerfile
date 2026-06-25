@@ -49,6 +49,7 @@ COPY --from=builder /app/data ./data
 
 # Built frontend static files
 COPY --from=builder /app/dist /usr/share/nginx/html
+COPY --from=builder /app/voidnext /usr/share/nginx/html/voidnext
 
 # Nginx + supervisord configs
 COPY docker/nginx.conf /etc/nginx/nginx.conf.template
