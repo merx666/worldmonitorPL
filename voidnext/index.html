@@ -3,14 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-    <title>Void Next</title>
+    <title>Next Wallet</title>
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <!-- World App MiniKit SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js@latest/dist/minikit.min.js"></script>
+    <script type="module">
+        import { MiniKit } from "https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js@latest/+esm";
+        window.MiniKit = MiniKit;
+    </script>
 </head>
 <body>
     <div class="glass-bg"></div>
@@ -25,7 +28,7 @@
                 </div>
             </div>
             <div class="header-logo">
-                <span class="logo-text">Void Next</span>
+                <span class="logo-text">Next Wallet</span>
                 <span class="premium-badge" id="premiumStatusBadge">FREE</span>
             </div>
         </header>
@@ -48,7 +51,7 @@
                     <div class="promo-content">
                         <h3>Unlock Premium Mode</h3>
                         <p>Get instant access to detailed local consumer prices, inflation baskets, and AI forecasts directly from our PostgreSQL database.</p>
-                        <button class="btn btn-premium" id="btnUnlockPremiumOverview">
+                        <button class="btn btn-premium" id="btnUnlockPremiumOverview" onclick="triggerPayment()">
                             <span class="btn-icon">⚡</span> Unlock for 0.5 WLD
                         </button>
                     </div>

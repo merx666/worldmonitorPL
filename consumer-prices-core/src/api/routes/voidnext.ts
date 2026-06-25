@@ -13,15 +13,18 @@ export async function voidnextRoutes(fastify: FastifyInstance) {
     try {
       const res = await fetch('https://worldmonitor.skyreel.art/api/bootstrap');
       if (res.ok) {
-        const data = await res.json() as any;
-        return reply.send({
-          success: true,
-          markets: data.marketQuotes || {},
-          crypto: data.cryptoQuotes || {},
-          climate: data.climateAnomalies || {},
-          positive: data.positiveGeoEvents || [],
-          brief: data.insights || {}
-        });
+        const payload = await res.json() as any;
+        const data = payload.data || {};
+        if (data.marketQuotes && Object.keys(data.marketQuotes).length > 0) {
+          return reply.send({
+            success: true,
+            markets: data.marketQuotes,
+            crypto: data.cryptoQuotes || {},
+            climate: data.climateAnomalies || {},
+            positive: data.positiveGeoEvents || [],
+            brief: data.insights || {}
+          });
+        }
       }
     } catch (err) {
       fastify.log.error(err, '[public-data] failed to fetch bootstrap');
@@ -184,20 +187,33 @@ export async function voidnextRoutes(fastify: FastifyInstance) {
       );
 
       const isPremium = userRes.rows[0]?.is_premium || false;
+
+      // Always fetch spread (used for Essentials Index and Value Basket Index which are free)
+      const spread = await buildRetailerSpreadSnapshot(market, 'essentials-ae');
+
       if (!isPremium) {
-        return reply.status(403).send({ error: 'premium_required', is_premium: false });
+        return reply.send({
+          success: true,
+          is_premium: false,
+          data: {
+            spread,
+            movers: { risers: [], fallers: [] },
+            categories: {},
+            series: []
+          }
+        });
       }
 
-      // Fetch all premium analytics snapshots
-      const [movers, categories, series, spread] = await Promise.all([
+      // Fetch all premium analytics snapshots for premium users
+      const [movers, categories, series] = await Promise.all([
         buildMoversSnapshot(market, 30),
         buildCategoriesSnapshot(market, '30d'),
         buildBasketSeriesSnapshot(market, 'essentials-ae', '30d'),
-        buildRetailerSpreadSnapshot(market, 'essentials-ae'),
       ]);
 
       return reply.send({
         success: true,
+        is_premium: true,
         data: {
           movers,
           categories,
@@ -208,6 +224,42 @@ export async function voidnextRoutes(fastify: FastifyInstance) {
     } catch (err) {
       fastify.log.error(err);
       return reply.status(500).send({ error: 'failed to retrieve premium data' });
+    }
+  });
+  
+  // Get Daily Sentiment Poll Results
+  fastify.get('/poll', async (request, reply) => {
+    try {
+      const res = await query<{ option_id: string; votes: number }>(
+        `SELECT option_id, votes FROM void_next_poll`
+      );
+      const votesMap = Object.fromEntries(res.rows.map(r => [r.option_id, r.votes]));
+      return reply.send({ success: true, votes: votesMap });
+    } catch (err) {
+      fastify.log.error(err);
+      return reply.status(500).send({ error: 'failed to fetch poll' });
+    }
+  });
+
+  // Vote in Daily Sentiment Poll
+  fastify.post('/poll/vote', async (request, reply) => {
+    const { option } = request.body as { option: string };
+    if (option !== 'bull' && option !== 'bear') {
+      return reply.status(400).send({ error: 'invalid option' });
+    }
+    try {
+      await query(
+        `UPDATE void_next_poll SET votes = votes + 1 WHERE option_id = $1`,
+        [option]
+      );
+      const res = await query<{ option_id: string; votes: number }>(
+        `SELECT option_id, votes FROM void_next_poll`
+      );
+      const votesMap = Object.fromEntries(res.rows.map(r => [r.option_id, r.votes]));
+      return reply.send({ success: true, votes: votesMap });
+    } catch (err) {
+      fastify.log.error(err);
+      return reply.status(500).send({ error: 'failed to record vote' });
     }
   });
 }

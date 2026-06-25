@@ -3,16 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-    <title>Void Next</title>
+    <title>Next Wallet</title>
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/src/voidnext.css">
     <!-- World App MiniKit SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js@latest/dist/minikit.min.js"></script>
+    <script type="module">
+        import { MiniKit } from "https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js@latest/+esm";
+        window.MiniKit = MiniKit;
+    </script>
 </head>
 <body>
+    <!-- Verification / Login Gate -->
+    <div id="loginGate" class="login-gate-overlay">
+        <style>
+            .login-gate-overlay {
+                background: radial-gradient(circle at center, rgba(10,12,16,0.95) 0%, rgba(2,3,5,1) 100%);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                z-index: 9999;
+            }
+            .login-gate-wrapper {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                height: 100%;
+                animation: fadeUpIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            }
+            .login-brand {
+                font-size: 10px;
+                letter-spacing: 0.4em;
+                color: rgba(255, 255, 255, 0.4);
+                text-transform: uppercase;
+                margin-bottom: 24px;
+                animation: pulse 4s infinite alternate;
+            }
+            .cyber-iris {
+                width: 120px;
+                height: 120px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+                border: 1px solid rgba(255,255,255,0.1);
+                box-shadow: 0 0 40px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255,255,255,0.05);
+                position: relative;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 40px;
+                transition: transform 0.3s ease;
+            }
+            .cyber-iris::before {
+                content: '';
+                position: absolute;
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.2) 60%, transparent 100%);
+                animation: breathe 3s ease-in-out infinite;
+                filter: blur(4px);
+            }
+            .cyber-iris::after {
+                content: '';
+                position: absolute;
+                width: 140px;
+                height: 140px;
+                border-radius: 50%;
+                border: 1px dashed rgba(255,255,255,0.15);
+                animation: spin 20s linear infinite;
+            }
+            .login-typography {
+                text-align: center;
+                margin-bottom: 48px;
+            }
+            .login-typography h2 {
+                font-size: 32px;
+                font-weight: 300;
+                letter-spacing: -0.02em;
+                color: #ffffff;
+                margin: 0 0 8px 0;
+                background: linear-gradient(to right, #fff, rgba(255,255,255,0.6));
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+            .login-typography p {
+                font-size: 14px;
+                color: rgba(255, 255, 255, 0.5);
+                font-weight: 400;
+                margin: 0;
+            }
+            .btn-verify-luxury {
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                color: #fff;
+                padding: 16px 40px;
+                border-radius: 30px;
+                font-size: 15px;
+                font-weight: 500;
+                letter-spacing: 0.02em;
+                cursor: pointer;
+                transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+                position: relative;
+                overflow: hidden;
+            }
+            .btn-verify-luxury::before {
+                content: '';
+                position: absolute;
+                top: 0; left: -100%; width: 50%; height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+                transform: skewX(-20deg);
+                animation: shimmer 3s infinite;
+            }
+            .btn-verify-luxury:hover {
+                background: rgba(255, 255, 255, 0.1);
+                transform: translateY(-2px);
+                box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            }
+            .btn-verify-luxury:active {
+                transform: translateY(1px);
+            }
+            @keyframes fadeUpIn {
+                0% { opacity: 0; transform: translateY(20px) scale(0.98); }
+                100% { opacity: 1; transform: translateY(0) scale(1); }
+            }
+            @keyframes breathe {
+                0%, 100% { transform: scale(1); opacity: 0.8; }
+                50% { transform: scale(1.1); opacity: 1; }
+            }
+            @keyframes spin {
+                100% { transform: rotate(360deg); }
+            }
+            @keyframes shimmer {
+                100% { left: 200%; }
+            }
+        </style>
+        <div class="login-gate-wrapper">
+            <div class="login-brand">WORLD APP EXCLUSIVE</div>
+            
+            <div class="cyber-iris"></div>
+
+            <div class="login-typography">
+                <h2>NEXT WALLET</h2>
+                <p>Verify your humanity to access the gateway.</p>
+            </div>
+            
+            <div id="loginError" class="login-error hidden" style="margin-bottom: 24px; color: #ff4a4a; background: rgba(255,74,74,0.1); padding: 12px; border-radius: 8px; font-size: 13px;"></div>
+            
+            <div class="login-actions">
+                <button class="btn-verify-luxury" id="btnVerifyAndEnter">Authenticate via World ID</button>
+            </div>
+        </div>
+    </div>
+
     <div class="glass-bg"></div>
     <div class="app-container">
         <!-- Safe-area Header -->
@@ -25,32 +169,49 @@
                 </div>
             </div>
             <div class="header-logo">
-                <span class="logo-text">Void Next</span>
+                <span class="logo-text">Next Wallet</span>
                 <span class="premium-badge" id="premiumStatusBadge">FREE</span>
             </div>
         </header>
 
         <!-- Horizontal Scrollable Tabs -->
         <nav class="app-nav" id="appNav">
-            <button class="nav-tab active" data-tab="overview">Overview</button>
+            <button class="nav-tab active" data-tab="wallet">Wallet</button>
+            <button class="nav-tab" data-tab="overview">Overview</button>
             <button class="nav-tab" data-tab="markets">Markets</button>
             <button class="nav-tab" data-tab="economy">Economy</button>
             <button class="nav-tab" data-tab="climate">Climate</button>
             <button class="nav-tab" data-tab="news">Positive News</button>
         </nav>
+        
+        <!-- Ani Ads Container -->
+        <div id="ani-ads-container" style="display:flex; justify-content:center; margin: 16px 0;"></div>
 
         <!-- Main Content Area -->
         <main class="app-main" id="appMain">
             <!-- TAB: OVERVIEW -->
-            <section class="tab-content active" id="tab-overview">
+            <section class="tab-content" id="tab-overview">
+                <!-- Streak Card -->
+                <div class="streak-card glass-card">
+                    <div class="streak-info">
+                        <span class="streak-fire">🔥</span>
+                        <div class="streak-details">
+                            <h4 id="streakDays">1-Day Streak</h4>
+                            <p id="streakMuted">Keep opening Next Wallet daily to increase your score!</p>
+                        </div>
+                    </div>
+                    <button class="btn btn-streak" id="btnCheckIn">Check In</button>
+                </div>
+
                 <!-- Welcome Promo Banner -->
                 <div class="promo-card" id="premiumUpgradeBanner">
                     <div class="promo-content">
                         <h3>Unlock Premium Mode</h3>
                         <p>Get instant access to detailed local consumer prices, inflation baskets, and AI forecasts directly from our PostgreSQL database.</p>
-                        <button class="btn btn-premium" id="btnUnlockPremiumOverview">
+                        <button class="btn btn-premium" id="btnUnlockPremiumOverview" onclick="triggerPayment()">
                             <span class="btn-icon">⚡</span> Unlock for 0.5 WLD
                         </button>
+                        <p style="font-size: 11px; color: rgba(255,255,255,0.5); text-align: center; margin-top: 8px;">Only for the first 250 users. Then 1 WLD.</p>
                     </div>
                 </div>
 
@@ -95,6 +256,34 @@
                         <p class="ai-brief-text" id="aiBriefOverview">Loading daily AI brief...</p>
                     </div>
                 </div>
+
+                <!-- Daily Poll Card -->
+                <div class="glass-card poll-card" id="pollCard">
+                    <div class="card-header">
+                        <span class="card-icon">🗳️</span>
+                        <h4>Daily Sentiment Poll<span class="live-dot"></span></h4>
+                    </div>
+                    <div class="card-body">
+                        <p class="poll-question">Where do you think the S&P 500 index will close today?</p>
+                        <div class="poll-options" id="pollOptions">
+                            <button class="poll-option-btn" data-vote="bull">Bullish 🐂</button>
+                            <button class="poll-option-btn" data-vote="bear">Bearish 🐻</button>
+                        </div>
+                        <div class="poll-results hidden" id="pollResults">
+                            <div class="result-bar-container">
+                                <span class="result-label">Bullish 🐂</span>
+                                <div class="result-track"><div class="result-bar bull-bar" style="width: 50%;"></div></div>
+                                <span class="result-val" id="bullPct">50%</span>
+                            </div>
+                            <div class="result-bar-container">
+                                <span class="result-label">Bearish 🐻</span>
+                                <div class="result-track"><div class="result-bar bear-bar" style="width: 50%;"></div></div>
+                                <span class="result-val" id="bearPct">50%</span>
+                            </div>
+                            <p class="poll-voted-msg">Thanks for voting! Live poll results are synced.</p>
+                        </div>
+                    </div>
+                </div>
             </section>
 
             <!-- TAB: MARKETS -->
@@ -121,63 +310,106 @@
                 </div>
             </section>
 
-            <!-- TAB: ECONOMY (PREMIUM) -->
+            <!-- TAB: ECONOMY -->
             <section class="tab-content" id="tab-economy">
-                <!-- Locked paywall view -->
-                <div class="paywall-overlay" id="economyPaywall">
-                    <div class="lock-icon">🔒</div>
-                    <h3>PostgreSQL Analytics Required</h3>
-                    <p>This section is locked. Please upgrade to Premium to view detailed consumer price indices, inflation trends, and regional basket metrics.</p>
-                    <button class="btn btn-premium btn-large" id="btnUnlockPremiumEconomy">
-                        💸 Unlock Premium for 0.5 WLD
-                    </button>
-                </div>
-
-                <!-- Unlocked content view -->
-                <div class="premium-content-wrapper hidden" id="economyPremiumContent">
-                    <div class="glass-card">
-                        <div class="card-header">
-                            <span class="card-icon">📊</span>
-                            <h4>CPI Consumer Basket Trends</h4>
-                        </div>
-                        <div class="card-body">
-                            <div class="basket-stats">
-                                <div class="stat-box">
-                                    <span class="stat-label">Essentials Index</span>
-                                    <span class="stat-value" id="premiumEssentialsIndex">0.00</span>
-                                </div>
-                                <div class="stat-box">
-                                    <span class="stat-label">Value Basket Index</span>
-                                    <span class="stat-value" id="premiumValueIndex">0.00</span>
-                                </div>
+                <!-- Unlocked Top Section (Fully free stats grid) -->
+                <div class="glass-card">
+                    <div class="card-header">
+                        <span class="card-icon">📊</span>
+                        <h4>CPI Consumer Basket Trends</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="basket-stats">
+                            <div class="stat-box">
+                                <span class="stat-label">Essentials Index</span>
+                                <span class="stat-value" id="premiumEssentialsIndex">4.12%</span>
                             </div>
-                            <!-- Simple chart simulation -->
-                            <div class="chart-wrapper">
-                                <div class="bar-chart" id="premiumBasketChart">
-                                    <!-- Populated dynamically -->
-                                </div>
+                            <div class="stat-box">
+                                <span class="stat-label">Value Basket Index</span>
+                                <span class="stat-value" id="premiumValueIndex">2.45%</span>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="glass-card">
-                        <div class="card-header">
-                            <span class="card-icon">⚡</span>
-                            <h4>Inflation Movers (30-Day Change)</h4>
+                <!-- Unlocked Middle Section (Personal Inflation Calculator - Fully Free) -->
+                <div class="glass-card calculator-card">
+                    <div class="card-header">
+                        <span class="card-icon">🧮</span>
+                        <h4>Personal Inflation Calculator</h4>
+                    </div>
+                    <div class="card-body">
+                        <p class="calc-desc">Enter your monthly budget to estimate your local cost of living impact.</p>
+                        <div class="calc-inputs">
+                            <div class="calc-input-group">
+                                <label>Groceries ($)</label>
+                                <input type="number" id="calcFood" value="300" min="0">
+                            </div>
+                            <div class="calc-input-group">
+                                <label>Energy & Utilities ($)</label>
+                                <input type="number" id="calcEnergy" value="150" min="0">
+                            </div>
+                            <div class="calc-input-group">
+                                <label>Other ($)</label>
+                                <input type="number" id="calcOther" value="400" min="0">
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <div class="movers-container">
-                                <div class="movers-column">
-                                    <h5>📈 Largest Risers</h5>
-                                    <ul class="movers-list" id="premiumRisers">
+                        <button class="btn btn-calc" id="btnCalculateInflation">Calculate Personal Impact</button>
+                        <div class="calc-result hidden" id="calcResult">
+                            <span>Estimated Personal Inflation:</span>
+                            <span id="calcResultVal" class="up">4.82%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Premium Locked Lower Section (Movers & Chart Breakdown) -->
+                <div class="premium-paywall-section" id="economyPaywallSection">
+                    <!-- Locked paywall view -->
+                    <div class="paywall-overlay" id="economyPaywall">
+                        <div class="lock-icon">🔒</div>
+                        <h3>Unlock Detailed Movers & Charts</h3>
+                        <p>Get access to 30-day risers and fallers lists, and the historical CPI essentials index chart from Postgres.</p>
+                        <button class="btn btn-premium btn-large" id="btnUnlockPremiumEconomy">
+                            💸 Unlock Premium for 0.5 WLD
+                        </button>
+                        <p style="font-size: 12px; color: rgba(255,255,255,0.5); text-align: center; margin-top: 12px;">Exclusive price for the first 250 users. Standard price: 1 WLD.</p>
+                    </div>
+
+                    <!-- Unlocked content view -->
+                    <div class="premium-content-wrapper hidden" id="economyPremiumContent">
+                        <div class="glass-card">
+                            <div class="card-header">
+                                <span class="card-icon">📈</span>
+                                <h4>CPI Essentials Index History</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-wrapper">
+                                    <div class="bar-chart" id="premiumBasketChart">
                                         <!-- Populated dynamically -->
-                                    </ul>
+                                    </div>
                                 </div>
-                                <div class="movers-column">
-                                    <h5>📉 Largest Fallers</h5>
-                                    <ul class="movers-list" id="premiumFallers">
-                                        <!-- Populated dynamically -->
-                                    </ul>
+                            </div>
+                        </div>
+
+                        <div class="glass-card">
+                            <div class="card-header">
+                                <span class="card-icon">⚡</span>
+                                <h4>Inflation Movers (30-Day Change)</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="movers-container">
+                                    <div class="movers-column">
+                                        <h5>📈 Largest Risers</h5>
+                                        <ul class="movers-list" id="premiumRisers">
+                                            <!-- Populated dynamically -->
+                                        </ul>
+                                    </div>
+                                    <div class="movers-column">
+                                        <h5>📉 Largest Fallers</h5>
+                                        <ul class="movers-list" id="premiumFallers">
+                                            <!-- Populated dynamically -->
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -187,8 +419,29 @@
 
             <!-- TAB: CLIMATE -->
             <section class="tab-content" id="tab-climate">
+                <!-- Real-Time Carbon Budget Spell -->
                 <div class="glass-card">
                     <div class="card-header">
+                        <span class="card-icon">⏳</span>
+                        <h4>1.5°C Carbon Budget Countdown</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="countdown-display">
+                            <div class="countdown-time" id="carbonCountdown">
+                                <span class="time-part" id="cd-years">00<small>yrs</small></span>
+                                <span class="time-part" id="cd-days">000<small>days</small></span>
+                                <span class="time-part" id="cd-hours">00<small>hrs</small></span>
+                                <span class="time-part" id="cd-mins">00<small>mins</small></span>
+                                <span class="time-part" id="cd-secs">00<small>secs</small></span>
+                            </div>
+                            <p class="countdown-desc">Estimated time remaining before the global carbon emissions budget for limiting warming to 1.5°C is fully exhausted.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <div class="card-header">
+                        <span class="card-icon">🌍</span>
                         <h4>Climate Anomalies & Statistics</h4>
                     </div>
                     <div class="card-body">
@@ -203,6 +456,26 @@
                                 <span class="metric-num" id="climateTemp">+1.16 °C</span>
                                 <span class="metric-trend bad">▲ Rising</span>
                             </div>
+                            <div class="metric-card">
+                                <span class="metric-title">Sea Level Rise</span>
+                                <span class="metric-num">+103.5 mm</span>
+                                <span class="metric-trend bad">▲ +3.4 mm/yr</span>
+                            </div>
+                            <div class="metric-card">
+                                <span class="metric-title">Arctic Sea Ice Min</span>
+                                <span class="metric-num">4.8M km²</span>
+                                <span class="metric-trend bad">▼ -12.2% / dec</span>
+                            </div>
+                            <div class="metric-card">
+                                <span class="metric-title">Methane (CH₄)</span>
+                                <span class="metric-num">1,921.4 ppb</span>
+                                <span class="metric-trend bad">▲ +11.2 ppb/yr</span>
+                            </div>
+                            <div class="metric-card">
+                                <span class="metric-title">Ocean Heat Anomaly</span>
+                                <span class="metric-num">345.0 ZJ</span>
+                                <span class="metric-trend bad">▲ +0.76 ZJ/yr</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -212,6 +485,183 @@
             <section class="tab-content" id="tab-news">
                 <div class="news-list" id="newsFeedList">
                     <!-- Populated dynamically -->
+                </div>
+            </section>
+
+            <!-- TAB: WALLET -->
+            <section class="tab-content active" id="tab-wallet">
+                <div class="glass-card wallet-card">
+                    <div class="wallet-header">
+                        <span class="wallet-icon">💳</span>
+                        <div class="wallet-title">
+                            <h4>Connected Wallet</h4>
+                            <span class="premium-badge badge-active" id="walletVerificationBadge">Device Verified</span>
+                        </div>
+                    </div>
+                    <div class="wallet-balance-section">
+                        <span class="balance-label">Total Estimated Balance</span>
+                        <h2 class="balance-amount" id="walletTotalUSD">$0.00 USD</h2>
+                        <span class="balance-usd" id="walletBalanceWLD">0.0000 WLD</span>
+                    </div>
+                    <div class="wallet-trend-section">
+                        <div class="trend-header">
+                            <span class="trend-label">24h WLD Trend</span>
+                            <span class="trend-change positive" id="walletTrendChange">+0.00%</span>
+                        </div>
+                        <div class="sparkline-container">
+                            <svg id="walletNetWorthSparkline" viewBox="0 0 300 80" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="sparklineGrad" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="var(--accent-color)" stop-opacity="0.25"></stop>
+                                        <stop offset="100%" stop-color="var(--accent-color)" stop-opacity="0.0"></stop>
+                                    </linearGradient>
+                                </defs>
+                                <path class="sparkline-area" d=""></path>
+                                <path class="sparkline-line" d=""></path>
+                                <circle class="sparkline-dot" cx="0" cy="0" r="4"></circle>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="wallet-details">
+                        <div class="detail-row clickable" id="btnCopyWalletAddress">
+                            <span>Address</span>
+                            <span class="address-val" id="walletFullAddress">0x... <span class="copy-icon">📋</span></span>
+                        </div>
+                        <div class="detail-row">
+                            <span>Network</span>
+                            <span>World Chain Mainnet</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Portfolio Allocation -->
+                <div class="glass-card" id="portfolioAllocationCard">
+                    <div class="card-header">
+                        <h4>Asset Allocation</h4>
+                    </div>
+                    <div class="card-body allocation-body">
+                        <div class="donut-chart-container">
+                            <svg id="allocationDonut" viewBox="0 0 200 200">
+                                <circle class="donut-hole" cx="100" cy="100" r="70" fill="transparent"></circle>
+                                <circle class="donut-ring" cx="100" cy="100" r="70" fill="transparent" stroke="rgba(255,255,255,0.03)" stroke-width="20"></circle>
+                                <g id="donutSegments"></g>
+                                <text class="donut-center-text" x="100" y="95" text-anchor="middle" fill="#8a99ad" font-size="11" font-weight="600" letter-spacing="1">PORTFOLIO</text>
+                                <text id="donutCenterValue" class="donut-center-val" x="100" y="120" text-anchor="middle" fill="white" font-size="18" font-weight="700">$0.00</text>
+                            </svg>
+                        </div>
+                        <div class="allocation-legend" id="allocationLegend">
+                            <!-- Filled dynamically -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="glass-card">
+                    <div class="card-header">
+                        <h4>Quick Actions</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="wallet-actions-grid">
+                            <button class="btn btn-action" id="btnWalletSend">
+                                📤 Send
+                            </button>
+                            <button class="btn btn-action" id="btnWalletReceive">
+                                📥 Deposit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Swap Card -->
+                <div class="glass-card">
+                    <div class="card-header">
+                        <h4>Swap Assets (0.5% Fee)</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="swap-form">
+                            <div class="swap-input-group">
+                                <label>From</label>
+                                <div class="swap-input-row">
+                                    <select id="swapSourceToken" class="input-select">
+                                        <option value="WLD" selected>WLD (Worldcoin)</option>
+                                        <option value="USDC.e">USDC.e (Bridged USDC)</option>
+                                        <option value="ETH">ETH (Ethereum)</option>
+                                        <option value="WBTC">WBTC (Wrapped Bitcoin)</option>
+                                        <option value="DNA">DNA (DNAToken)</option>
+                                        <option value="$AXO">$AXO (AXOLOCOIN)</option>
+                                        <option value="WDD">WDD (Drachma)</option>
+                                        <option value="ORO">ORO (ORO)</option>
+                                        <option value="PERSIAN">PERSIAN (PERSIAN)</option>
+                                        <option value="PUF">PUF (PUF)</option>
+                                        <option value="MODO">MODO (MODO Token)</option>
+                                    </select>
+                                    <input type="number" id="swapSourceAmount" placeholder="0.00" class="input-text" step="any">
+                                </div>
+                                <div class="swap-meta-row">
+                                    <div class="swap-percentage-buttons">
+                                        <button class="btn-pct" data-pct="0.25">25%</button>
+                                        <button class="btn-pct" data-pct="0.50">50%</button>
+                                        <button class="btn-pct" data-pct="0.75">75%</button>
+                                        <button class="btn-pct" data-pct="1.00">100%</button>
+                                    </div>
+                                    <span class="balance-sub" id="swapSourceBalance">Balance: 0.0000</span>
+                                </div>
+                            </div>
+                            
+                            <div class="swap-divider">
+                                <button class="btn-swap-arrow" id="btnSwapReverse">↓</button>
+                            </div>
+                            
+                            <div class="swap-input-group">
+                                <label>To</label>
+                                <div class="swap-input-row">
+                                    <select id="swapTargetToken" class="input-select">
+                                        <option value="USDC.e" selected>USDC.e (Bridged USDC)</option>
+                                        <option value="WLD">WLD (Worldcoin)</option>
+                                        <option value="ETH">ETH (Ethereum)</option>
+                                        <option value="WBTC">WBTC (Wrapped Bitcoin)</option>
+                                        <option value="DNA">DNA (DNAToken)</option>
+                                        <option value="$AXO">$AXO (AXOLOCOIN)</option>
+                                        <option value="WDD">WDD (Drachma)</option>
+                                        <option value="ORO">ORO (ORO)</option>
+                                        <option value="PERSIAN">PERSIAN (PERSIAN)</option>
+                                        <option value="PUF">PUF (PUF)</option>
+                                        <option value="MODO">MODO (MODO Token)</option>
+                                    </select>
+                                    <input type="text" id="swapTargetAmount" placeholder="0.00" class="input-text" readonly>
+                                </div>
+                                <span class="balance-sub" id="swapTargetBalance">Balance: 0.0000</span>
+                            </div>
+
+                            <div class="swap-quote-details hidden" id="swapQuoteDetails">
+                                <div class="detail-row">
+                                    <span>Exchange Rate</span>
+                                    <span id="swapExchangeRate">-</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span>Service Fee (0.5%)</span>
+                                    <span id="swapServiceFee">-</span>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-action btn-full" id="btnExecuteSwap" disabled>
+                                Swap Assets
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Token Balances List -->
+                <div class="glass-card">
+                    <div class="card-header">
+                        <h4>Token Balances</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="token-list" id="walletTokenList">
+                            <!-- Populated dynamically -->
+                            <div class="loading-spinner">Loading balances...</div>
+                        </div>
+                    </div>
                 </div>
             </section>
         </main>

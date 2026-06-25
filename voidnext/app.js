@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------------
-// Void Next — Application Orchestrator
+// Next Wallet — Application Orchestrator
 // ---------------------------------------------------------------------------
 
 const BACKEND_URL = window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1')
@@ -62,6 +62,14 @@ function switchTab(tabId) {
 
 // MiniKit Integration
 async function initMiniKit() {
+  // Wait up to 5 seconds for MiniKit script tag to fully load and register
+  for (let i = 0; i < 50; i++) {
+    if (typeof window.MiniKit !== 'undefined') break;
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+
+  const MiniKit = window.MiniKit;
+
   try {
     if (typeof MiniKit === 'undefined') {
       console.warn('MiniKit SDK not found. Running in Web Sandbox mode.');
@@ -158,7 +166,7 @@ function updatePremiumUI(isPremium) {
 // Payments Initiation
 async function triggerPayment() {
   const referenceId = 'tr_' + Math.random().toString(36).substring(2, 15);
-  const recipient = '0xf023f8fA50a52c63288f862dde1d4820fA5e3f6d';
+  const recipient = '0xc7d0ef606a313bfd69e6cc1c44065df8d99b8dfc';
   const price = '0.5'; // 0.5 WLD
 
   // If we are in standard browser (non-World App), simulate payment
@@ -176,8 +184,8 @@ async function triggerPayment() {
     const result = await MiniKit.commands.pay({
       reference: referenceId,
       to: recipient,
-      tokens: [{ symbol: 'WLD', amount: price }],
-      description: 'Void Next Premium Membership'
+      tokens: [{ symbol: 'WLD', token_amount: price }],
+      description: 'Next Wallet Premium Membership'
     });
 
     if (result && result.status === 'success') {
@@ -195,6 +203,7 @@ async function triggerPayment() {
     }
   }
 }
+window.triggerPayment = triggerPayment;
 
 async function verifyPaymentBackend(reference, amount) {
   try {
