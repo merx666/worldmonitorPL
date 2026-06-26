@@ -41,6 +41,7 @@ export default defineConfig({
   plugins: [
     brotliPrecompressPlugin(),
     VitePWA({
+      filename: 'pwa-sw.js',
       registerType: 'autoUpdate',
       includeAssets: [
         'favico/favicon.ico',
