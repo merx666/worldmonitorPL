@@ -283,7 +283,8 @@ function updatePremiumUI(isPremium: boolean): void {
 
 // Payments Initiation
 async function triggerPayment(): Promise<void> {
-  const referenceId = 'tr_' + Math.random().toString(36).substring(2, 15);
+  // WorldApp requires a valid UUIDv4 for the reference, otherwise the native app crashes
+  const referenceId = crypto.randomUUID();
   const recipient = '0xc7d0ef606a313bfd69e6cc1c44065df8d99b8dfc';
   const price = '0.5';
 
