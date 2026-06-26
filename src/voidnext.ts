@@ -193,7 +193,7 @@ async function initMiniKit(): Promise<void> {
       return;
     }
 
-    const installResult = MiniKit.install();
+    const installResult = MiniKit.install('app_staging_f023f8');
     console.log('MiniKit install status:', installResult);
 
     await checkAuthStatus();
