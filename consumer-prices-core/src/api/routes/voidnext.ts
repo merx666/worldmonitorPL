@@ -8,27 +8,57 @@ import {
 } from '../../snapshots/worldmonitor.js';
 
 export async function voidnextRoutes(fastify: FastifyInstance) {
+  // Helper to fetch key from Upstash Redis
+  async function getRedisKey(url: string, token: string, key: string): Promise<any> {
+    try {
+      const resp = await fetch(url, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(['GET', key]),
+      });
+      if (!resp.ok) return null;
+      const resJson = await resp.json() as any;
+      if (!resJson || typeof resJson.result !== 'string') return null;
+      const parsed = JSON.parse(resJson.result);
+      if (parsed && parsed.data !== undefined && parsed._seed !== undefined) {
+        return parsed.data;
+      }
+      return parsed;
+    } catch {
+      return null;
+    }
+  }
+
   // Public data aggregator proxy
   fastify.get('/public-data', async (request, reply) => {
-    try {
-      const res = await fetch('https://worldmonitor.skyreel.art/api/bootstrap');
-      if (res.ok) {
-        const payload = await res.json() as any;
-        const data = payload.data || {};
-        if (data.marketQuotes && Object.keys(data.marketQuotes).length > 0) {
+    const url = process.env.UPSTASH_REDIS_REST_URL;
+    const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+    if (url && token) {
+      try {
+        const [marketQuotes, cryptoQuotes, climateAnomalies, positiveGeoEvents, insights] = await Promise.all([
+          getRedisKey(url, token, 'market:stocks-bootstrap:v1'),
+          getRedisKey(url, token, 'market:crypto:v1'),
+          getRedisKey(url, token, 'climate:anomalies:v2'),
+          getRedisKey(url, token, 'positive_events:geo-bootstrap:v1'),
+          getRedisKey(url, token, 'news:insights:v1'),
+        ]);
+
+        if (marketQuotes && Object.keys(marketQuotes).length > 0) {
           return reply.send({
             success: true,
-            markets: data.marketQuotes,
-            crypto: data.cryptoQuotes || {},
-            climate: data.climateAnomalies || {},
-            positive: data.positiveGeoEvents || [],
-            brief: data.insights || {}
+            markets: marketQuotes,
+            crypto: cryptoQuotes || {},
+            climate: climateAnomalies || {},
+            positive: positiveGeoEvents || [],
+            brief: insights || {}
           });
         }
+      } catch (err) {
+        fastify.log.error(err, '[public-data] failed to fetch from Upstash Redis');
       }
-    } catch (err) {
-      fastify.log.error(err, '[public-data] failed to fetch bootstrap');
     }
+
     // Safe fallbacks
     return reply.send({
       success: true,
