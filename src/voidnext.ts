@@ -286,7 +286,6 @@ async function triggerPayment(): Promise<void> {
   // WorldApp requires a valid UUIDv4 for the reference, otherwise the native app crashes
   const referenceId = crypto.randomUUID();
   const recipient = '0xc7d0ef606a313bfd69e6cc1c44065df8d99b8dfc';
-  const price = '0.5';
 
   // If we are in standard browser (non-World App), simulate payment
   if (typeof MiniKit === 'undefined' || !MiniKit.isInstalled()) {
