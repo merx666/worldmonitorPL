@@ -303,7 +303,7 @@ async function triggerPayment(): Promise<void> {
     const result = await MiniKit.pay({
       reference: referenceId,
       to: recipient,
-      tokens: [{ symbol: 'WLD', token_amount: price }],
+      tokens: [{ symbol: 'WLD', token_amount: '500000000000000000' }], // 0.5 WLD in base units (18 decimals)
       description: 'Next Wallet Premium Membership'
     });
 
