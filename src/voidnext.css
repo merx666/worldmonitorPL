@@ -170,8 +170,16 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   overflow-x: auto;
   gap: 8px;
-  padding: 16px 20px;
+  padding: 12px 16px;
+  margin: 0 20px 8px 20px;
+  border-radius: 24px;
+  border: 1px solid var(--border-color);
+  background: var(--surface-color);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), var(--glow-shadow);
   scrollbar-width: none; /* Firefox */
+  z-index: 10;
 }
 
 .app-nav::-webkit-scrollbar {
