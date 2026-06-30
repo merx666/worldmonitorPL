@@ -1611,7 +1611,6 @@ function initRSSSelector() {
     localStorage.setItem('user_rss_preference', newFeed);
     
     // Attempt to save to backend DB (fire-and-forget mock)
-    // @ts-expect-error
     if (typeof BACKEND_URL !== 'undefined') {
       fetch(`${BACKEND_URL}/user/rss`, {
         method: 'POST',
@@ -1699,12 +1698,9 @@ function initRAGSearch() {
         `;
         div.addEventListener('click', () => {
           // Add to SUPPORTED_TOKENS dynamically if not exists
-          // @ts-expect-error
           if (typeof SUPPORTED_TOKENS !== 'undefined') {
-            // @ts-expect-error
             const exists = SUPPORTED_TOKENS.find(t => t.symbol === token.symbol);
             if (!exists) {
-              // @ts-expect-error
               SUPPORTED_TOKENS.push({
                 symbol: token.symbol,
                 name: token.name,
