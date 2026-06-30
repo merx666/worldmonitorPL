@@ -63,6 +63,9 @@ export default defineConfig({
           { src: '/favico/android-chrome-512x512.png', sizes: '512x512', type: 'image/png' },
         ],
       },
+      workbox: {
+        maximumFileSizeToCacheInBytes: 40000000, // 40MB for ONNX model wasm
+      }
     }),
   ],
   build: {
