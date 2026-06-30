@@ -259,7 +259,7 @@ async function loginUser(wallet: string, username: string, verification: string)
 function updatePremiumUI(isPremium: boolean): void {
   const badge = document.getElementById('premiumStatusBadge');
   const banner = document.getElementById('premiumUpgradeBanner');
-  const paywall = document.getElementById('economyPaywall');
+  const paywall = document.getElementById('economyPaywallSection');
   const content = document.getElementById('economyPremiumContent');
 
   if (isPremium) {
@@ -277,7 +277,7 @@ function updatePremiumUI(isPremium: boolean): void {
     }
     if (banner) banner.classList.remove('hidden');
     if (paywall) paywall.classList.remove('hidden');
-    if (content) content.classList.remove('hidden');
+    if (content) content.classList.add('hidden');
   }
 }
 
