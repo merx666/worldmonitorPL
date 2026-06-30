@@ -443,36 +443,7 @@ function renderPublicData(payload: any): void {
     });
   }
 
-  // 5. Render Positive News Tab
-  const newsFeedList = document.getElementById('newsFeedList');
-  if (newsFeedList) {
-    newsFeedList.innerHTML = '';
-    const positiveNews = payload.positive || [];
-    if (positiveNews.length > 0) {
-      positiveNews.forEach((item: any) => {
-        newsFeedList.innerHTML += `
-          <div class="news-item">
-            <div class="news-title">${item.title}</div>
-            <span class="news-tag">Impact Event</span>
-          </div>
-        `;
-      });
-    } else {
-      const fallbacks = [
-        "Global solar energy capacity surges by 30% in 2025.",
-        "Reforestation project restores 10,000 hectares of Amazon rainforest.",
-        "Breakthrough carbon-capture facility commences operational testing."
-      ];
-      fallbacks.forEach(title => {
-        newsFeedList.innerHTML += `
-          <div class="news-item">
-            <div class="news-title">${title}</div>
-            <span class="news-tag">Impact Event</span>
-          </div>
-        `;
-      });
-    }
-  }
+  // 5. Render Positive News Tab (Now handled by RSS feed independently)
 }
 
 // Fetch Premium Economy Data (PostgreSQL)
@@ -1540,3 +1511,121 @@ function startCarbonCountdown(): void {
 // Expose triggerPayment globally for inline handlers
 (window as any).triggerPayment = triggerPayment;
 
+// --- RSS Feed Logic ---
+async function loadRSSFeed(feedUrl: string) {
+  const newsFeedList = document.getElementById('newsFeedList');
+  if (!newsFeedList) return;
+
+  newsFeedList.innerHTML = `
+    <div class="news-item-shell is-visible" style="grid-column: 1 / -1; text-align: center;">
+      <div class="news-item-core">
+        <div class="news-item-title" style="color: var(--text-muted);">Loading premium feed...</div>
+      </div>
+    </div>
+  `;
+
+  try {
+    const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`);
+    const data = await res.json();
+    
+    if (data.status !== 'ok') throw new Error('RSS fetch failed');
+
+    newsFeedList.innerHTML = '';
+    
+    data.items.slice(0, 8).forEach((item: any, idx: number) => {
+      // Calculate delay based on index for staggered animation
+      const animDelay = (idx % 4) * 0.15;
+      
+      const pubDate = new Date(item.pubDate).toLocaleDateString(undefined, { 
+        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+      });
+
+      const articleHtml = `
+        <article class="news-item-shell" style="transition-delay: ${animDelay}s;">
+          <div class="news-item-core">
+            <div class="news-item-header">
+              <span class="news-item-eyebrow">${data.feed.title || 'News'}</span>
+              <span class="news-item-date">${pubDate}</span>
+            </div>
+            <h3 class="news-item-title">${item.title}</h3>
+            
+            <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="news-cta-btn">
+              Read Article
+              <span class="news-cta-icon">
+                <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </a>
+          </div>
+        </article>
+      `;
+      newsFeedList.innerHTML += articleHtml;
+    });
+
+    // Set up Intersection Observer for scroll animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { rootMargin: '0px 0px -50px 0px' });
+
+    document.querySelectorAll('.news-item-shell').forEach(el => observer.observe(el));
+
+  } catch (err) {
+    console.error('Failed to load RSS:', err);
+    newsFeedList.innerHTML = `
+      <div class="news-item-shell is-visible" style="grid-column: 1 / -1; text-align: center;">
+        <div class="news-item-core">
+          <div class="news-item-title" style="color: var(--danger-color);">Failed to load news feed.</div>
+        </div>
+      </div>
+    `;
+  }
+}
+
+// Initialize RSS Selector
+function initRSSSelector() {
+  const selector = document.getElementById('rssFeedSelector') as HTMLSelectElement | null;
+  if (!selector) return;
+
+  // Load saved preference
+  const savedRss = localStorage.getItem('user_rss_preference');
+  if (savedRss) {
+    const optionExists = Array.from(selector.options).some(opt => opt.value === savedRss);
+    if (optionExists) {
+      selector.value = savedRss;
+    }
+  }
+
+  // Load initial feed
+  loadRSSFeed(selector.value);
+
+  // Listen for changes
+  selector.addEventListener('change', (e) => {
+    const target = e.target as HTMLSelectElement;
+    const newFeed = target.value;
+    
+    // Save to localStorage
+    localStorage.setItem('user_rss_preference', newFeed);
+    
+    // Attempt to save to backend DB (fire-and-forget mock)
+    // @ts-ignore
+    if (typeof BACKEND_URL !== 'undefined') {
+      fetch(`${BACKEND_URL}/user/rss`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rssUrl: newFeed })
+      }).catch(() => { /* ignore backend failure if it doesn't exist yet */ });
+    }
+
+    // Reload feed
+    loadRSSFeed(newFeed);
+  });
+}
+
+// Run init when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  initRSSSelector();
+});

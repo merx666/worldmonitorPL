@@ -22,7 +22,13 @@
         import { MiniKit } from "https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js@latest/+esm";
         window.MiniKit = MiniKit;
     </script>
-    <script>(function(s){s.dataset.zone='11203563',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+    <script>
+      // ponytail: delay 15s, adjust if revenue impact unacceptable
+      setTimeout(function(){
+        (function(s){s.dataset.zone='11203563';s.src='https://nap5k.com/tag.min.js'})
+        ([document.documentElement,document.body].filter(Boolean).pop().appendChild(document.createElement('script')));
+      }, 15000);
+    </script>
 </head>
 <body>
     <!-- Verification / Login Gate -->
@@ -482,7 +488,16 @@
 
             <!-- TAB: NEWS -->
             <section class="tab-content" id="tab-news">
-                <div class="news-list" id="newsFeedList">
+                <div class="news-header-actions">
+                    <span class="rss-selector-label">News Source</span>
+                    <select id="rssFeedSelector" class="rss-select">
+                        <option value="https://feeds.bbci.co.uk/news/world/rss.xml" selected>BBC World</option>
+                        <option value="https://www.coindesk.com/arc/outboundfeeds/rss/">CoinDesk (Crypto)</option>
+                        <option value="https://techcrunch.com/feed/">TechCrunch</option>
+                        <option value="https://cointelegraph.com/rss">CoinTelegraph</option>
+                    </select>
+                </div>
+                <div class="news-list bento-grid" id="newsFeedList">
                     <!-- Populated dynamically -->
                 </div>
             </section>
@@ -665,14 +680,32 @@
             </section>
         </main>
 
-        <!-- Horizontal Scrollable Tabs -->
+        <!-- Premium Floating Bottom Nav -->
         <nav class="app-nav" id="appNav">
-            <button class="nav-tab active" data-tab="wallet">Wallet</button>
-            <button class="nav-tab" data-tab="overview">Overview</button>
-            <button class="nav-tab" data-tab="markets">Markets</button>
-            <button class="nav-tab" data-tab="economy">Economy</button>
-            <button class="nav-tab" data-tab="climate">Climate</button>
-            <button class="nav-tab" data-tab="news">Positive News</button>
+            <button class="nav-tab active" data-tab="wallet">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M16 12h4"/><circle cx="18" cy="12" r="1"/><path d="M6 4v-1a2 2 0 012-2h8a2 2 0 012 2v1"/></svg>
+                <span class="nav-label">Wallet</span>
+            </button>
+            <button class="nav-tab" data-tab="overview">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+                <span class="nav-label">Overview</span>
+            </button>
+            <button class="nav-tab" data-tab="markets">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                <span class="nav-label">Markets</span>
+            </button>
+            <button class="nav-tab" data-tab="economy">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v12"/><path d="M15 9.5c-.8-1-2-1.5-3-1.5s-2.7.8-2.7 2c0 2.4 5.4 1.2 5.4 4 0 1.3-1.3 2-2.7 2s-2.2-.5-3-1.5"/></svg>
+                <span class="nav-label">Economy</span>
+            </button>
+            <button class="nav-tab" data-tab="climate">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v2"/><circle cx="12" cy="12" r="4"/><path d="M12 20v2"/><path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M4.93 19.07l1.41-1.41"/><path d="M17.66 6.34l1.41-1.41"/></svg>
+                <span class="nav-label">Climate</span>
+            </button>
+            <button class="nav-tab" data-tab="news">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 002-2V4a2 2 0 00-2-2H8a2 2 0 00-2 2v16a2 2 0 01-2 2zm0 0a2 2 0 01-2-2v-9h4"/><path d="M10 6h8"/><path d="M10 10h8"/><path d="M10 14h4"/></svg>
+                <span class="nav-label">News</span>
+            </button>
         </nav>
     </div>
 
