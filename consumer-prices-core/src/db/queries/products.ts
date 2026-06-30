@@ -46,7 +46,7 @@ export async function getRetailerProductsByRetailer(retailerId: string): Promise
   return result.rows;
 }
 
-export async function getCanonicalProducts(marketCode?: string): Promise<CanonicalProduct[]> {
+export async function getCanonicalProducts(_marketCode?: string): Promise<CanonicalProduct[]> {
   const result = await query<CanonicalProduct>(
     `SELECT * FROM canonical_products WHERE active = true ORDER BY canonical_name`,
     [],

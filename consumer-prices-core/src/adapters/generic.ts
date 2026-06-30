@@ -4,7 +4,7 @@
  * Works with any acquisition provider (Playwright, Firecrawl, Exa, P0).
  */
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore — jsdom types provided via @types/jsdom
+// @ts-expect-error — jsdom types provided via @types/jsdom
 import { JSDOM } from 'jsdom';
 import { fetchWithFallback } from '../acquisition/registry.js';
 import type { AdapterContext, FetchResult, ParsedProduct, RetailerAdapter, Target } from './types.js';
@@ -28,7 +28,7 @@ function parsePrice(text: string | null | undefined, config: RetailerConfig): nu
   clean = clean.replace(new RegExp(`\\${thou}`, 'g'), '').replace(dec, '.').replace(/[^\d.]/g, '').trim();
 
   const val = parseFloat(clean);
-  return isNaN(val) ? null : val;
+  return Number.isNaN(val) ? null : val;
 }
 
 function selectText(doc: Document, selector: string): string | null {

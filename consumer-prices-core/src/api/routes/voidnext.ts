@@ -30,7 +30,7 @@ export async function voidnextRoutes(fastify: FastifyInstance) {
   }
 
   // Public data aggregator proxy
-  fastify.get('/public-data', async (request, reply) => {
+  fastify.get('/public-data', async (_request, reply) => {
     const url = process.env.UPSTASH_REDIS_REST_URL;
     const token = process.env.UPSTASH_REDIS_REST_TOKEN;
 
@@ -258,7 +258,7 @@ export async function voidnextRoutes(fastify: FastifyInstance) {
   });
   
   // Get Daily Sentiment Poll Results
-  fastify.get('/poll', async (request, reply) => {
+  fastify.get('/poll', async (_request, reply) => {
     try {
       const res = await query<{ option_id: string; votes: number }>(
         `SELECT option_id, votes FROM void_next_poll`

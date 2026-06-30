@@ -91,10 +91,10 @@ async function checkAuthStatus(): Promise<void> {
 
   // Real World App Environment
   const user = MiniKit.user;
-  if (user && user.walletAddress) {
+  if (user?.walletAddress) {
     userWallet = user.walletAddress;
     
-    if (user.verificationStatus && user.verificationStatus.isOrbVerified) {
+    if (user.verificationStatus?.isOrbVerified) {
       userVerificationLevel = 'Orb Verified';
     } else {
       userVerificationLevel = user.verificationLevel || 'Device Verified';
@@ -147,7 +147,7 @@ function setupVerifyButton(isMock: boolean): void {
             statement: 'Sign in to Next Wallet'
           });
           
-          if (result && result.data && result.data.address) {
+          if (result?.data?.address) {
             userWallet = result.data.address;
             userVerificationLevel = 'Verified Wallet';
             
@@ -306,7 +306,7 @@ async function triggerPayment(): Promise<void> {
       description: 'Next Wallet Premium Membership'
     });
 
-    if (result && result.transactionId) {
+    if (result?.transactionId) {
       console.log('Payment successful. Verifying on backend...', result);
       await verifyPaymentBackend(result.transactionId, 0.5);
     } else {
@@ -393,7 +393,7 @@ function renderPublicData(payload: any): void {
   // 3. Render AI Brief
   const aiBriefText = document.getElementById('aiBriefOverview');
   if (aiBriefText) {
-    if (payload.brief && payload.brief.summary) {
+    if (payload.brief?.summary) {
       aiBriefText.textContent = payload.brief.summary;
     } else {
       aiBriefText.textContent = "Global market indices consolidate as inflation figures approach policy targets. Renewable capacity deployment sets historic highs in European energy grids, offsetting fossil fuel dependency.";
@@ -1079,7 +1079,7 @@ async function syncPricesWithLifi(): Promise<void> {
     const lifiTokens = data.tokens?.[480] || [];
     SUPPORTED_TOKENS.forEach(t => {
       const found = lifiTokens.find((lt: any) => lt.address.toLowerCase() === t.address.toLowerCase());
-      if (found && found.priceUSD) {
+      if (found?.priceUSD) {
         t.priceUSD = parseFloat(found.priceUSD);
       }
     });
@@ -1210,7 +1210,7 @@ function initWallet(): void {
       const amount = prompt('Enter amount of WLD to send:');
       if (!amount) return;
       const parsedAmount = parseFloat(amount);
-      if (isNaN(parsedAmount) || parsedAmount <= 0) {
+      if (Number.isNaN(parsedAmount) || parsedAmount <= 0) {
         alert('Invalid amount.');
         return;
       }
@@ -1234,7 +1234,7 @@ function initWallet(): void {
           description: 'WLD Wallet Transfer'
         });
 
-        if (result && result.transactionId) {
+        if (result?.transactionId) {
           alert(`Successfully sent ${amount} WLD!`);
           updateWalletBalances();
         } else {
@@ -1263,7 +1263,7 @@ function initWallet(): void {
     if (!srcSelect || !tgtSelect || !srcAmountInput || !tgtAmountInput || !userWallet) return;
     
     const amount = parseFloat(srcAmountInput.value);
-    if (isNaN(amount) || amount <= 0) {
+    if (Number.isNaN(amount) || amount <= 0) {
       tgtAmountInput.value = '';
       if (quoteDetails) quoteDetails.classList.add('hidden');
       if (btnExecute) btnExecute.disabled = true;
@@ -1333,7 +1333,7 @@ function initWallet(): void {
     btnExecute.addEventListener('click', async () => {
       if (!activeQuote || !srcSelect || !tgtSelect || !srcAmountInput || !tgtAmountInput) return;
       const amount = parseFloat(srcAmountInput.value);
-      if (isNaN(amount) || amount <= 0) return;
+      if (Number.isNaN(amount) || amount <= 0) return;
 
       const userBal = lastBalances[srcSelect.value] || 0;
       if (userBal < amount) {
@@ -1611,7 +1611,7 @@ function initRSSSelector() {
     localStorage.setItem('user_rss_preference', newFeed);
     
     // Attempt to save to backend DB (fire-and-forget mock)
-    // @ts-ignore
+    // @ts-expect-error
     if (typeof BACKEND_URL !== 'undefined') {
       fetch(`${BACKEND_URL}/user/rss`, {
         method: 'POST',
@@ -1699,12 +1699,12 @@ function initRAGSearch() {
         `;
         div.addEventListener('click', () => {
           // Add to SUPPORTED_TOKENS dynamically if not exists
-          // @ts-ignore
+          // @ts-expect-error
           if (typeof SUPPORTED_TOKENS !== 'undefined') {
-            // @ts-ignore
+            // @ts-expect-error
             const exists = SUPPORTED_TOKENS.find(t => t.symbol === token.symbol);
             if (!exists) {
-              // @ts-ignore
+              // @ts-expect-error
               SUPPORTED_TOKENS.push({
                 symbol: token.symbol,
                 name: token.name,
