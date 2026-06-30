@@ -1625,7 +1625,121 @@ function initRSSSelector() {
   });
 }
 
+// --- Local RAG Worker Integration ---
+function initRAGSearch() {
+  const ragInput = document.getElementById('ragTokenSearchInput') as HTMLInputElement | null;
+  const ragResults = document.getElementById('ragSearchResults');
+  const swapTargetSelect = document.getElementById('swapTargetToken') as HTMLSelectElement | null;
+
+  if (ragInput && ragResults && swapTargetSelect) {
+    let ragWorker: Worker | null = null;
+    
+    // Initialize worker
+    try {
+      ragWorker = new Worker(new URL('./workers/rag.worker.ts', import.meta.url), { type: 'module' });
+      ragWorker.postMessage({ type: 'init' });
+      
+      ragWorker.onmessage = (e) => {
+        const { status, results, progress } = e.data;
+        
+        if (status === 'loading_model' || status === 'loading_tokens' || status === 'embedding_tokens') {
+          ragInput.placeholder = `✨ RAG Init: ${status} ${progress ? Math.round(progress) + '%' : ''}...`;
+        } else if (status === 'embedding_ready') {
+          ragInput.placeholder = `✨ RAG Search (e.g. 'stablecoin on base', 'meme coin')`;
+        } else if (status === 'search_results') {
+          renderRagResults(results);
+        }
+      };
+    } catch (err) {
+      console.warn("RAG Worker init failed", err);
+      ragInput.placeholder = "RAG search unavailable";
+      ragInput.disabled = true;
+    }
+
+    let debounceTimer: any;
+    ragInput.addEventListener('input', (e) => {
+      const query = (e.target as HTMLInputElement).value;
+      if (query.length < 2) {
+        ragResults.classList.remove('active');
+        return;
+      }
+      
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        ragResults.innerHTML = '<div class="rag-loading">Thinking...</div>';
+        ragResults.classList.add('active');
+        ragWorker?.postMessage({ type: 'search', query });
+      }, 300); // 300ms debounce
+    });
+    
+    // Close dropdown on outside click
+    document.addEventListener('click', (e) => {
+      if (!ragInput.contains(e.target as Node) && !ragResults.contains(e.target as Node)) {
+        ragResults.classList.remove('active');
+      }
+    });
+
+    function renderRagResults(results: any[]) {
+      if (!results || results.length === 0) {
+        ragResults!.innerHTML = '<div class="rag-loading">No semantic match found</div>';
+        return;
+      }
+      
+      ragResults!.innerHTML = '';
+      results.forEach((item) => {
+        const { token, score } = item;
+        const div = document.createElement('div');
+        div.className = 'rag-result-item';
+        div.innerHTML = `
+          <img class="rag-result-icon" src="${token.logoURI || ''}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22/>'">
+          <div class="rag-result-info">
+            <span class="rag-result-symbol">${token.symbol} (${Math.round(score * 100)}% match)</span>
+            <span class="rag-result-name">${token.name} on Chain ${token.chainId}</span>
+          </div>
+        `;
+        div.addEventListener('click', () => {
+          // Add to SUPPORTED_TOKENS dynamically if not exists
+          // @ts-ignore
+          if (typeof SUPPORTED_TOKENS !== 'undefined') {
+            // @ts-ignore
+            const exists = SUPPORTED_TOKENS.find(t => t.symbol === token.symbol);
+            if (!exists) {
+              // @ts-ignore
+              SUPPORTED_TOKENS.push({
+                symbol: token.symbol,
+                name: token.name,
+                address: token.address,
+                decimals: token.decimals || 18,
+                priceUSD: parseFloat(token.priceUSD) || 0
+              });
+            }
+          }
+          
+          // Add to select options
+          const optExists = Array.from(swapTargetSelect!.options).some(o => o.value === token.symbol);
+          if (!optExists) {
+            const opt = document.createElement('option');
+            opt.value = token.symbol;
+            opt.text = `${token.symbol} (RAG Discovered)`;
+            swapTargetSelect!.appendChild(opt);
+          }
+          
+          // Select it
+          swapTargetSelect!.value = token.symbol;
+          ragInput!.value = '';
+          ragResults!.classList.remove('active');
+          
+          // Trigger select change logic
+          swapTargetSelect!.dispatchEvent(new Event('change'));
+        });
+        ragResults!.appendChild(div);
+      });
+    }
+  }
+}
+
 // Run init when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
   initRSSSelector();
+  initRAGSearch();
 });

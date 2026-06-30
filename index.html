@@ -627,24 +627,20 @@
                             </div>
                             
                             <div class="swap-input-group">
-                                <label>To</label>
+                                <div class="rag-search-wrapper" style="position:relative; margin-bottom: 12px;">
+                                    <input type="text" id="ragTokenSearchInput" placeholder="✨ RAG Search (e.g. 'stablecoin on base', 'meme coin')" class="input-text" style="width: 100%; border-radius: 12px; padding: 12px; border: 1px solid var(--accent-color); background: rgba(99, 102, 241, 0.1);">
+                                    <div id="ragSearchResults" class="rag-results-dropdown"></div>
+                                </div>
+                                <label>To (Target Asset)</label>
                                 <div class="swap-input-row">
                                     <select id="swapTargetToken" class="input-select">
                                         <option value="USDC.e" selected>USDC.e (Bridged USDC)</option>
-                                        <option value="WLD">WLD (Worldcoin)</option>
-                                        <option value="ETH">ETH (Ethereum)</option>
-                                        <option value="WBTC">WBTC (Wrapped Bitcoin)</option>
-                                        <option value="DNA">DNA (DNAToken)</option>
-                                        <option value="$AXO">$AXO (AXOLOCOIN)</option>
-                                        <option value="WDD">WDD (Drachma)</option>
-                                        <option value="ORO">ORO (ORO)</option>
-                                        <option value="PERSIAN">PERSIAN (PERSIAN)</option>
-                                        <option value="PUF">PUF (PUF)</option>
-                                        <option value="MODO">MODO (MODO Token)</option>
                                     </select>
-                                    <input type="text" id="swapTargetAmount" placeholder="0.00" class="input-text" readonly>
+                                    <input type="number" id="swapTargetAmount" placeholder="0.00" class="input-text" readonly>
                                 </div>
-                                <span class="balance-sub" id="swapTargetBalance">Balance: 0.0000</span>
+                                <div class="swap-meta-row">
+                                    <span class="balance-sub" id="swapTargetBalance">Balance: 0.0000</span>
+                                </div>
                             </div>
 
                             <div class="swap-quote-details hidden" id="swapQuoteDetails">
